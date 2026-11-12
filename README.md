@@ -1,25 +1,14 @@
-# CargoTrack Kenya
 
-A PHP and MySQL cargo tracking system based on the CargoTrack Kenya proposal. It supports customer accounts, staff-managed shipment records, status and movement history, delivery confirmation, optional browser GPS coordinates, and CSV reports.
 
-## Local setup with XAMPP
+## Deploy to InfinityFree from GitHub
 
-1. Start Apache and MySQL from the XAMPP Control Panel.
-2. Import `schema.sql` using phpMyAdmin or the MySQL command-line client.
-3. Review `config.php`. The defaults match a local XAMPP installation with MySQL on `127.0.0.1`, database `cargo_track`, user `root`, and an empty password. Set environment variables `DB_HOST`, `DB_NAME`, `DB_USER`, `DB_PASS`, and `APP_BASE_URL` to override them. For a deployment at the web root, set `APP_BASE_URL` to `/`.
-4. From the project directory, create the first administrator using `C:\xampp\php\php.exe createAdmin.php`. The script is CLI-only and refuses to create another administrator if one already exists.
-5. Open `http://localhost/isaac/` and sign in. Create staff and customer accounts on the Users page.
+This PHP/MySQL app cannot run on GitHub Pages. The `Deploy to InfinityFree` GitHub Actions workflow uploads the site to InfinityFree over FTP when `main` is updated.
 
-Use PHP 8.0 or later with PDO MySQL and MySQL 8 or MariaDB. The browser's current-location button requires user permission and a secure context (HTTPS or localhost). Coordinates are optional and are saved only when explicitly requested.
+1. Create an InfinityFree hosting account and a MySQL database in its control panel. Note the database host, name, username, and password.
+2. In phpMyAdmin launched from the control panel, select that database and import the table definitions from `schema.sql`, omitting its initial `CREATE DATABASE` and `USE cargo_track` statements.
+3. Create `config.local.php` from `config.local.example.php`, fill in those database values, and leave `app_base_url` set to `/` for the domain root. Upload this file separately to `htdocs` with the InfinityFree File Manager; GitHub intentionally excludes it so credentials never enter the public repository.
+4. In GitHub **Settings → Secrets and variables → Actions**, create `FTP_SERVER`, `FTP_USERNAME`, and `FTP_PASSWORD` from the hosting panel's FTP credentials. Never commit or share these secrets.
+5. Create the first admin through phpMyAdmin if the host does not allow CLI/remote MySQL. Generate a password hash locally with PHP, then insert an admin row into `users`; do not create a public admin setup page.
+6. After adding the FTP secrets, run the workflow from **Actions → Deploy to InfinityFree → Run workflow** or push to `main`. Confirm the URL works over HTTPS.
 
-## Roles and access
-
-- **Administrator:** manages staff/customer accounts, registers and updates cargo, and downloads organization-wide reports.
-- **Staff:** registers and updates shipments and downloads organization-wide reports.
-- **Customer:** views only shipments assigned to their account and downloads a customer-scoped report.
-
-Customer self-registration creates customer accounts only. Administrators are provisioned through the CLI script; additional staff/customer accounts are created by an administrator.
-
-## Deployment notes
-
-The GPS feature reads device coordinates in the browser; it does not connect to a GPS tracker or IoT device. The app does not include a cloud hosting provider, external notification service, or customs/warehouse workflow. Before public deployment, configure strong database credentials, HTTPS, production error logging, database backups, and hosting-specific environment variables. Do not expose a development `config.php` with production credentials.
+The FTP workflow targets `/htdocs/`. If your panel shows a different FTP root, update `server-dir` in `.github/workflows/infinityfree.yml`. GitHub Pages is not this application's hosting target.
