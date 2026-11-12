@@ -18,3 +18,7 @@ RewriteRule ^cargo/update_info\.php$ cargoUpdateInfo.php [L]
 RewriteRule ^cargo/update_status\.php$ cargoUpdateStatus.php [L]
 RewriteRule ^cargo/dashboard\.php$ dashboard.php [L]
 RewriteRule ^users/index\.php$ userManagement.php [L]
+
+<FilesMatch "^(config(\.local)?\.php|schema\.sql|README\.md)$">
+    Require all denied
+</FilesMatch>
